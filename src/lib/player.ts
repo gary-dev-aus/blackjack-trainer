@@ -1,10 +1,15 @@
 import { get, writable, type Writable } from "svelte/store"
 import type { Card } from "./card"
 import type { Deck } from "./deck"
-import { BLACKJACK } from "./gameConfig"
+import { BET_MAXIMUM, BET_MINIMUM, BLACKJACK, STARTING_CHIPS } from "./gameConfig"
 
 type Hand = { cards: Writable<Card[]>, value: Writable<number> }
-type PlayerState = "inactive" | "active" | "stand" | "bust" | "blackjack"
+type PlayerState = "inactive" | "betting" | "playing" | "stand" | "bust" | "blackjack"
+type Bet = Writable<{
+    amount: number;
+    multiplier: number;
+    history: number[]
+}>
 
 export class Player {
     name: string
@@ -13,9 +18,12 @@ export class Player {
         value: writable(0)
     }
     state: Writable<PlayerState> = writable("inactive")
+    chips: Writable<number>
+    bet: Bet | null = null
 
-    constructor(name: string) {
+    constructor(name: string, chips: number = STARTING_CHIPS) {
         this.name = name
+        this.chips = writable(chips)
     }
 
     drawCard(deck: Deck, reveal: boolean = true) {
@@ -46,6 +54,30 @@ export class Player {
             return calculateHandValue(this.hand)
         })
         return get(this.hand.value)
+    }
+
+    placeBet(amount: number, multiplier: number = 1) {
+        this.chips.update(chips => {
+            if (amount > chips) {
+                throw new Error("Insufficient funds.")
+            } else if (amount < BET_MINIMUM || amount > BET_MAXIMUM) {
+                throw new Error(`Bet must be between ${BET_MINIMUM} and ${BET_MAXIMUM}.`)
+            }
+
+            typeof this.bet === "undefined" && (this.bet = writable({ amount, multiplier, history: [] }))
+
+            if (this.bet === null) {
+                this.bet = writable({ amount, multiplier, history: [amount] })
+            } else {
+                this.bet.update((bet) => {
+                    return { amount, multiplier, history: [...bet.history, amount] }
+                })
+            }
+
+            return chips - amount
+        })
+        console.log(`${this.name} placed a bet of ${amount}.`)
+        console.log(get(this.bet!), get(this.chips))
     }
 
     hit(deck: Deck) {

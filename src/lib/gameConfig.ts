@@ -2,6 +2,9 @@ export const INITIAL_SHUFFLE_COUNT = 20
 export const DEALER_STANDS_AT = 17
 export const BLACKJACK = 21
 export const DECKS = 6
+export const STARTING_CHIPS = 1000
+export const BET_MINIMUM = 2
+export const BET_MAXIMUM = 500
 
 export type Rank = {
     name: {

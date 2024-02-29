@@ -5,16 +5,7 @@ import { INITIAL_SHUFFLE_COUNT, RANKS, SUITS } from "./gameConfig"
 import { createNewDeck, shuffle, type Deck, type Discard } from "./deck"
 import { dealCards } from "./deal"
 
-// export enum GameState {
-//     INITIAL = "initial",
-//     DEAL = "deal",
-//     PLAYER = "player",
-//     DEALER = "dealer",
-//     ROUND_END = "roundEnd",
-//     GAME_END = "gameEnd"
-// }
-
-type GameState = "initial" | "player" | "dealer" | "roundEnd" | "gameEnd"
+type GameState = "initial" | "betting" | "player" | "dealer" | "roundEnd" | "gameEnd"
 
 export class Game {
     players: Player[] = []
@@ -40,18 +31,23 @@ export class Game {
     }
 
     startNewGame() {
-        this.state.set("player")
         console.log("Game of Blackjack has started.")
         const deck = get(this.deck)
         const shuffledDeck = shuffle(deck, INITIAL_SHUFFLE_COUNT)
 
         this.deck.set(shuffledDeck)
-        this.startRound()
+        this.startBetRound()
     }
 
-    startRound() {
+    startBetRound() {
+        console.log("Betting round has started.")
+        this.state.set("betting")
+        this.players[0].state.set("betting")
+    }
+
+    startPlayRound() {
         dealCards(2, this.players, this.deck)
-        this.players[0].state.set("active")
+        this.players[0].state.set("playing")
     }
 
     newPlayerTurn(currentPlayer: Player) {
@@ -67,7 +63,7 @@ export class Game {
             if (newPlayerIndex === this.players.length - 1) {
                 this.state.set("dealer")
             }
-            this.players[newPlayerIndex].state.set("active")
+            this.players[newPlayerIndex].state.set("playing")
         }
     }
 }
