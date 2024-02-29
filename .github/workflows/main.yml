@@ -1,0 +1,34 @@
+name: Build SvelteKit with Bun
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.11.1
+
+    - name: Install Bun
+      run: npm install -g bun  # Install Bun globally
+
+    - name: Install project dependencies
+      run: bun install
+
+    - name: Build SvelteKit project
+      run: bun run build
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts
+        path: build  # Adjust the path to the build output directory
