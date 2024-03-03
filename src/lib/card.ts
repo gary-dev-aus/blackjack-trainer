@@ -1,3 +1,5 @@
+import { capitalise } from "./helper"
+
 interface Rank {
     name: {
         short: string
@@ -39,14 +41,18 @@ export class Card {
         const rank = capitalise(this.rank.name.short)
         const suit = this.suit.symbol
 
-        if (option === "string") {
-            return `${rank}${suit}`
+        if (this.isRevealed) {
+            if (option === "string") {
+                return `${rank}${suit}`
+            } else {
+                return [rank, suit]
+            }
         } else {
-            return [rank, suit]
+            if (option === "string") {
+                return "??"
+            } else {
+                return ["??", "?"]
+            }
         }
     }
-}
-
-function capitalise(word: string): string {
-    return word[0].toUpperCase() + word.slice(1)
 }

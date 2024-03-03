@@ -8,12 +8,6 @@
 	export let game: Game;
 
 	const cards = player.hand.cards;
-	const value = player.hand.value;
-	const state = player.state;
-	const chips = player.chips;
-	const bet = player.bet;
-
-	const detailsClass = 'flex flex-row space-x-2';
 </script>
 
 <div>

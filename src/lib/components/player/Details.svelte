@@ -4,7 +4,8 @@
 	export let player: Player;
 
 	const playerState = player.state;
-	const value = player.state;
+	const hand = player.hand.cards;
+	const value = player.hand.value;
 	const chips = player.chips;
 	const bet = player.bet;
 
@@ -13,7 +14,9 @@
 
 <p>{player.name}</p>
 <div class={detailsClass}>
-	<p>Value: {$value}</p>
+	{#if $hand.length > 0}
+		<p>Value: {$value}</p>
+	{/if}
 	{#if $playerState === 'bust'}
 		<p>Bust!</p>
 	{:else if $playerState === 'blackjack'}

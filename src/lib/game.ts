@@ -46,11 +46,17 @@ export class Game {
     }
 
     startPlayRound() {
+        console.log("Dealing cards to all players...")
+        this.state.set("player")
         dealCards(2, this.players, this.deck)
         this.players[0].state.set("playing")
+        console.log("Cards dealt.")
+        console.log(`${this.players[0].name}'s turn.`)
     }
 
     newPlayerTurn(currentPlayer: Player) {
+        const state = get(this.state)
+
         const currentPlayerIndex = this.players.indexOf(currentPlayer)
         const newPlayerIndex = currentPlayerIndex + 1
 
@@ -59,11 +65,29 @@ export class Game {
             this.state.set("roundEnd")
             // End round logic
         } else {
-            console.log(`${this.players[newPlayerIndex].name}'s turn.`)
+            const string = `${this.players[newPlayerIndex].name}'s turn.`
+
+            let isDealer = false
+            // Check for dealer
             if (newPlayerIndex === this.players.length - 1) {
-                this.state.set("dealer")
+                if (state === "player") {
+                    this.state.set("dealer")
+                }
+                isDealer = true
             }
-            this.players[newPlayerIndex].state.set("playing")
+
+            if (state === "betting") {
+                if (isDealer) {
+                    this.startPlayRound()
+                } else {
+                    console.log(string)
+                    this.players[newPlayerIndex].state.set("betting")
+                }
+            } else if (state === "player") {
+                console.log(string)
+                console.log(get(this.players[newPlayerIndex].state))
+                this.players[newPlayerIndex].state.set("playing")
+            }
         }
     }
 }
