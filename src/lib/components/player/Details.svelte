@@ -27,7 +27,7 @@
 	<p>Chips: {$chips}</p>
 	{#if $bet === null}
 		<p>No bet</p>
-	{:else if $bet?.amount >= 0}
+	{:else}
 		<p>Bet: {$bet?.amount}</p>
 	{/if}
 </div>

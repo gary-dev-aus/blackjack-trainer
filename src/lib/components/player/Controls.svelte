@@ -9,42 +9,86 @@
 	const playerState = player.state;
 
 	let customBet = minBet;
-	const betOptions = [minBet, customBet, maxBet];
+
+	// Prevent non numeric in customBet
+	function onKeydown(event: KeyboardEvent) {
+		if (isNaN(parseInt(event.key)) && event.key !== 'Backspace') event.preventDefault();
+	}
+
+	// Styles
 	const optionsButton = 'text-left';
+	const grid = 'grid grid-cols-5 gap-4';
+	const error = 'text-red-500';
 </script>
 
-<div class="grid grid-cols-5">
+<div>
 	{#if $playerState === 'playing'}
-		<button
-			on:click|preventDefault={() => {
-				player.hit(game.deck);
-				if ($playerState === 'bust' || $playerState === 'blackjack') game.newPlayerTurn(player);
-			}}
-			class={optionsButton}
-		>
-			Hit
-		</button>
-		<button
-			on:click|preventDefault={() => {
-				player.stand();
-				game.newPlayerTurn(player);
-			}}
-			class={optionsButton}
-		>
-			Stand
-		</button>
-	{/if}
-	{#if $playerState === 'betting'}
-		{#each betOptions as betOption}
+		<div class={grid}>
 			<button
 				on:click|preventDefault={() => {
-					player.placeBet(betOption);
+					player.hit(game.deck);
+					if ($playerState === 'bust' || $playerState === 'blackjack') game.newPlayerTurn(player);
+				}}
+				class={optionsButton}
+			>
+				Hit
+			</button>
+			<button
+				on:click|preventDefault={() => {
+					player.stand();
 					game.newPlayerTurn(player);
 				}}
 				class={optionsButton}
 			>
-				{betOption}
+				Stand
 			</button>
-		{/each}
+		</div>
+	{/if}
+	{#if $playerState === 'betting'}
+		<div class={grid}>
+			<p>Bet:</p>
+			<button
+				on:click|preventDefault={() => {
+					player.placeBet(minBet);
+					game.newPlayerTurn(player);
+				}}
+				class={optionsButton}
+			>
+				{minBet}
+			</button>
+			<button
+				on:click|preventDefault={() => {
+					player.placeBet(customBet);
+					game.newPlayerTurn(player);
+				}}
+				disabled={customBet < minBet || customBet > maxBet}
+			>
+				{customBet}
+			</button>
+			<button
+				on:click|preventDefault={() => {
+					player.placeBet(maxBet);
+					game.newPlayerTurn(player);
+				}}
+				class={optionsButton}
+			>
+				{maxBet}
+			</button>
+		</div>
+		<p>Customise bet:</p>
+		<input
+			type="number"
+			title="Numbers only"
+			on:keydown={onKeydown}
+			bind:value={customBet}
+			min={minBet}
+			max={maxBet}
+		/>
+		<input type="range" bind:value={customBet} min={minBet} max={maxBet} class="mt-1" />
+		{#if customBet < minBet}
+			<p class={error}>Below minimum bet.</p>
+		{:else if customBet > maxBet}
+			<p class={error}>Above maximum bet.</p>
+		{/if}
 	{/if}
 </div>

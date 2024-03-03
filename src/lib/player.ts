@@ -78,8 +78,8 @@ export class Player {
 
             return chips - amount
         })
-        console.log(`${this.name} placed a bet of ${amount}.`)
 
+        console.log(`${this.name} placed a bet of ${amount}.`)
         this.state.set("inactive")
     }
 
