@@ -85,7 +85,6 @@ export class Game {
                 }
             } else if (state === "player") {
                 console.log(string)
-                console.log(get(this.players[newPlayerIndex].state))
                 this.players[newPlayerIndex].state.set("playing")
             }
         }
