@@ -6,7 +6,6 @@
 	export let player: Player;
 	export let game: Game;
 
-	const gameState = game.state;
 	const playerState = player.state;
 
 	let customBet = minBet;
@@ -35,11 +34,12 @@
 			Stand
 		</button>
 	{/if}
-	{#if $gameState === 'betting'}
+	{#if $playerState === 'betting'}
 		{#each betOptions as betOption}
 			<button
 				on:click|preventDefault={() => {
 					player.placeBet(betOption);
+					game.newPlayerTurn(player);
 				}}
 				class={optionsButton}
 			>

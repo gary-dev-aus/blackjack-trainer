@@ -5,6 +5,7 @@ export const DECKS = 6
 export const STARTING_CHIPS = 1000
 export const BET_MINIMUM = 2
 export const BET_MAXIMUM = 500
+export const STARTING_BET_ORDER = true
 
 export type Rank = {
     name: {

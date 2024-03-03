@@ -4,7 +4,9 @@ import type { Deck } from "./deck"
 import { BET_MAXIMUM, BET_MINIMUM, BLACKJACK, STARTING_CHIPS } from "./gameConfig"
 
 type Hand = { cards: Writable<Card[]>, value: Writable<number> }
+
 type PlayerState = "inactive" | "betting" | "playing" | "stand" | "bust" | "blackjack"
+
 type Bet = Writable<{
     amount: number;
     multiplier: number;
@@ -77,7 +79,8 @@ export class Player {
             return chips - amount
         })
         console.log(`${this.name} placed a bet of ${amount}.`)
-        console.log(get(this.bet!), get(this.chips))
+
+        this.state.set("inactive")
     }
 
     hit(deck: Deck) {
@@ -93,6 +96,7 @@ export class Player {
     }
 
     stand() {
+        console.log(`${this.name} stands with a hand value of ${this.getHandValue()}.`)
         this.state.set("stand")
     }
 }
