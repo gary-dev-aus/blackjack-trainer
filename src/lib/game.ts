@@ -55,6 +55,20 @@ export class Game {
         console.log(`${this.players[0].name}'s turn.`)
     }
 
+    endRound() {
+        console.log("Round has ended. Winnings will now be awarded.")
+        this.state.set("roundEnd")
+
+        const players = this.players
+        const dealer = players[players.length - 1]
+        const dealerValue = dealer.getHandValue()
+
+        // Pay out winnings
+        for (let i = 0; i < players.length - 1; i++) {
+            players[i].payOut(dealerValue)
+        }
+    }
+
     newPlayerTurn(currentPlayer: Player) {
         const state = get(this.state)
 
@@ -62,9 +76,7 @@ export class Game {
         const newPlayerIndex = currentPlayerIndex + 1
 
         if (newPlayerIndex === this.players.length) {
-            console.log("Round has ended.")
-            this.state.set("roundEnd")
-            // End round logic
+            this.endRound()
         } else {
             const string = `${this.players[newPlayerIndex].name}'s turn.`
 

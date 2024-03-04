@@ -98,6 +98,24 @@ export class Player {
         console.log(`${this.name} stands with a hand value of ${this.getHandValue()}.`)
         this.state.set("stand")
     }
+
+    payOut(dealerValue: number) {
+        const playerValue = get(this.hand.value)
+        if (playerValue <= BLACKJACK) {
+            if (dealerValue > BLACKJACK || playerValue > dealerValue) {
+                this.bet.update(bet => {
+                    this.chips.update(chips => {
+                        const winnings = bet.amount * bet.multiplier * 2
+                        console.log(`${this.name} bet ${bet.amount} and wins ${winnings}.`)
+
+                        return chips + winnings
+                    })
+
+                    return { amount: 0, multiplier: 1, history: bet.history }
+                })
+            }
+        }
+    }
 }
 
 function calculateHandValue(hand: Hand): number {

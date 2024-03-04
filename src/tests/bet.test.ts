@@ -21,10 +21,10 @@ describe("end betting", () => {
     it("ends the betting round, swaps the game state to player", () => {
         const game = new Game(2, 1)
         game.startNewGame()
-        game.startBetRound()
 
         const players = game.players
 
+        // Exclude dealer in placing bets
         for (let i = 0; i < players.length - 1; i++) {
             players[i].placeBet(10)
             game.newPlayerTurn(players[i])
