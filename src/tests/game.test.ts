@@ -1,3 +1,4 @@
+import { Card } from "$lib/card";
 import { Game } from "$lib/game";
 import { get } from "svelte/store";
 import { describe, expect, it } from "vitest";
@@ -18,5 +19,26 @@ describe("start new game", () => {
         expect(get(game.state)).toBe("betting")
 
         expect(get(game.players[0].hand.cards).length).toBe(0)
+    })
+})
+
+describe("check naturals", () => {
+    it("loops through player hands and sets them to having naturals if they have an ace and 10 value card", () => {
+        const game = new Game(2, 3)
+        const players = game.players
+
+        players[0].hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "10", long: "ten" }, value: 10 }, { name: "hearts", symbol: "♥" })
+        ])
+        players[1].hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "9", long: "nine" }, value: 9 }, { name: "hearts", symbol: "♥" })
+        ])
+
+        const hasNaturals = game.checkNaturals()
+
+        expect(hasNaturals).toBe(true)
+        expect(get(players[0].state)).toBe("natural")
     })
 })

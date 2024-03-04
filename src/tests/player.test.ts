@@ -57,10 +57,35 @@ describe("player calculates hand value", () => {
 
         player.drawCard(deck)
         const expectedValue = 11
-        expect(player.getHandValue()).toBe(expectedValue)
+        expect(player.generateHandValue()).toBe(expectedValue)
 
         player.drawCard(deck)
         const expectedValueWithAces = 12
-        expect(player.getHandValue()).toBe(expectedValueWithAces)
+        expect(player.generateHandValue()).toBe(expectedValueWithAces)
+    })
+})
+
+describe("player busts", () => {
+    it("sets player as bust if hand value is over 21", () => {
+        const player = new Player("Player 1")
+
+        player.hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+        ])
+        const deck = writable([
+            new Card({ name: { short: "k", long: "king" }, value: 10 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+        ])
+        player.hit(deck)
+
+        const expectedState1 = "inactive"
+        const receivedState1 = get(player.state)
+        expect(receivedState1).toBe(expectedState1)
+
+        player.hit(deck)
+
+        const expectedState2 = "bust"
+        const receivedState2 = get(player.state)
+        expect(receivedState2).toBe(expectedState2)
     })
 })
