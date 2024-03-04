@@ -70,6 +70,8 @@ export class Player {
             } else if (amount < BET_MINIMUM || amount > BET_MAXIMUM) {
                 throw new Error(`Bet must be between ${BET_MINIMUM} and ${BET_MAXIMUM}.`)
             }
+            // TODO - add a catch to where placeBet is invoked so the error can 
+            // can be caught and the player can be prompted to place a valid bet.
 
             this.bet.update((bet) => {
                 return { amount, multiplier, history: [...bet.history, amount] }
@@ -106,6 +108,7 @@ export class Player {
             if (dealerValue >= BLACKJACK || playerValue >= dealerValue) {
                 this.bet.update(bet => {
                     this.chips.update(chips => {
+                        // TODO - score multipliers for naturals
                         let winningMultiplier = 2
 
                         if (playerValue === dealerValue) {
