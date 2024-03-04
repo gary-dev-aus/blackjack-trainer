@@ -23,11 +23,13 @@
 		<p>Blackjack!</p>
 	{/if}
 </div>
-<div class={detailsClass}>
-	<p>Chips: {$chips}</p>
-	{#if $bet === null}
-		<p>No bet</p>
-	{:else}
-		<p>Bet: {$bet?.amount}</p>
-	{/if}
-</div>
+{#if !player.isDealer}
+	<div class={detailsClass}>
+		<p>Chips: {$chips}</p>
+		{#if $bet.amount === 0}
+			<p>No bet</p>
+		{:else}
+			<p>Bet: {$bet.amount}</p>
+		{/if}
+	</div>
+{/if}

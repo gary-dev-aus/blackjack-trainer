@@ -21,7 +21,12 @@ export class Player {
     }
     state: Writable<PlayerState> = writable("inactive")
     chips: Writable<number>
-    bet: Bet | null = null
+    bet: Bet = writable({
+        amount: 0,
+        multiplier: 1,
+        history: []
+    })
+    isDealer: boolean = false
 
     constructor(name: string, chips: number = STARTING_CHIPS) {
         this.name = name
@@ -66,15 +71,9 @@ export class Player {
                 throw new Error(`Bet must be between ${BET_MINIMUM} and ${BET_MAXIMUM}.`)
             }
 
-            typeof this.bet === "undefined" && (this.bet = writable({ amount, multiplier, history: [] }))
-
-            if (this.bet === null) {
-                this.bet = writable({ amount, multiplier, history: [amount] })
-            } else {
-                this.bet.update((bet) => {
-                    return { amount, multiplier, history: [...bet.history, amount] }
-                })
-            }
+            this.bet.update((bet) => {
+                return { amount, multiplier, history: [...bet.history, amount] }
+            })
 
             return chips - amount
         })

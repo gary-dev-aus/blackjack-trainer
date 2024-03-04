@@ -19,6 +19,7 @@ export class Game {
         }
         // Dealer goes last
         this.players.push(new Player("Dealer"))
+        this.players[this.players.length - 1].isDealer = true
 
         const cards: Card[] = []
 
