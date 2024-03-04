@@ -1,3 +1,4 @@
+export const PLAYER_COUNT = 1
 export const INITIAL_SHUFFLE_COUNT = 20
 export const DEALER_STANDS_AT = 17
 export const BLACKJACK = 21
@@ -6,6 +7,14 @@ export const STARTING_CHIPS = 1000
 export const BET_MINIMUM = 2
 export const BET_MAXIMUM = 500
 export const STARTING_BET_ORDER = true
+export const PENETRATION = 0.5
+export const SHUFFLE_WEIGHT = {
+    "3": 0.5,
+    "4": 0.3,
+    "5": 0.1,
+    "6": 0.05,
+    "7": 0.05
+}
 
 export type Rank = {
     name: {

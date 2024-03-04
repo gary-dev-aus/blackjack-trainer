@@ -57,10 +57,10 @@ describe("player calculates hand value", () => {
 
         player.drawCard(deck)
         const expectedValue = 11
-        expect(player.getHandValue()).toBe(expectedValue)
+        expect(player.generateHandValue()).toBe(expectedValue)
 
         player.drawCard(deck)
         const expectedValueWithAces = 12
-        expect(player.getHandValue()).toBe(expectedValueWithAces)
+        expect(player.generateHandValue()).toBe(expectedValueWithAces)
     })
 })

@@ -1,8 +1,7 @@
 import { get, writable, type Writable } from "svelte/store"
-import { Card } from "./card"
 import { Player } from "./player"
-import { INITIAL_SHUFFLE_COUNT, RANKS, SUITS } from "./gameConfig"
-import { createNewDeck, shuffle, type Deck, type Discard } from "./deck"
+import { DECKS, INITIAL_SHUFFLE_COUNT, PENETRATION, PLAYER_COUNT, RANKS, SHUFFLE_WEIGHT, STARTING_CHIPS, SUITS } from "./gameConfig"
+import { shuffle, type Deck, createFinalDeck, generateRandomWeighted } from "./deck"
 import { dealCards } from "./deal"
 
 type GameState = "initial" | "betting" | "player" | "dealer" | "roundEnd" | "gameEnd"
@@ -11,24 +10,21 @@ export class Game {
     players: Player[] = []
     state: Writable<GameState> = writable("initial")
     deck: Deck
-    discard: Discard = writable([])
+    discard: Deck = writable([])
 
-    constructor(playerCount: number = 1, deckCount: number = 1) {
+    constructor(
+        playerCount: number = PLAYER_COUNT,
+        deckCount: number = DECKS,
+        startingChips: number = STARTING_CHIPS
+    ) {
         for (let i = 0; i < playerCount; i++) {
-            this.players.push(new Player(`Player ${i + 1}`))
+            this.players.push(new Player(`Player ${i + 1}`, startingChips))
         }
         // Dealer goes last
         this.players.push(new Player("Dealer"))
         this.players[this.players.length - 1].isDealer = true
 
-        const cards: Card[] = []
-
-        for (let i = 0; i < deckCount; i++) {
-            const deck = createNewDeck(RANKS, SUITS)
-            cards.push(...deck)
-        }
-
-        this.deck = writable(cards)
+        this.deck = writable(createFinalDeck(deckCount, RANKS, SUITS))
     }
 
     startNewGame() {
@@ -59,14 +55,66 @@ export class Game {
         console.log("Round has ended. Winnings will now be awarded.")
         this.state.set("roundEnd")
 
+        this.checkWinners()
+        this.emptyHands()
+
+        // Check deck size to see if a reshuffle is needed.
+        const totalDeckSize = DECKS * 52
+        const currentDeckSize = get(this.deck).length
+        if (currentDeckSize <= totalDeckSize * PENETRATION) {
+            console.log("Deck penetration reached. Reshuffling deck.")
+
+            this.deck = writable(createFinalDeck(DECKS, RANKS, SUITS))
+            shuffle(get(this.deck), INITIAL_SHUFFLE_COUNT)
+        }
+
+        if (this.checkDeck()) this.reshuffleDeck()
+
+        // Begin new round of bets
+        this.startBetRound()
+    }
+
+    checkWinners() {
         const players = this.players
         const dealer = players[players.length - 1]
-        const dealerValue = dealer.getHandValue()
+        const dealerValue = get(dealer.hand.value)
 
         // Pay out winnings
         for (let i = 0; i < players.length - 1; i++) {
             players[i].payOut(dealerValue)
         }
+    }
+
+    emptyHands() {
+        const players = this.players
+        for (let i = 0; i < players.length; i++) {
+            players[i].emptyHand(this.discard)
+        }
+    }
+
+    /** Returns true if a shuffle is required. */
+    checkDeck(cutCard?: number): boolean {
+        const totalDeckSize = DECKS * RANKS.length * SUITS.length
+        const currentDeckSize = get(this.deck).length
+        if (cutCard === undefined) {
+            // 60% penetration means 40% of the deck is left. Cut card would be the 40th
+            // card left in the deck.
+            cutCard = Math.floor(totalDeckSize * (1 - PENETRATION))
+        }
+
+        return currentDeckSize <= cutCard
+    }
+
+    reshuffleDeck() {
+        console.log("Reshuffling the deck...")
+        const deck = get(this.deck)
+        const discard = get(this.discard)
+
+        const shuffleCount = generateRandomWeighted(SHUFFLE_WEIGHT)
+
+        const combinedDeck = [...deck, ...discard]
+        const shuffledDeck = shuffle(combinedDeck, shuffleCount)
+        this.deck.set(shuffledDeck)
     }
 
     newPlayerTurn(currentPlayer: Player) {

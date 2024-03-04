@@ -1,9 +1,8 @@
 import { type Writable } from "svelte/store"
 import { Card } from "./card"
-import type { Rank, Suit } from "./gameConfig"
+import { RANKS, SUITS, type Rank, type Suit } from "./gameConfig"
 
 export type Deck = Writable<Card[]>
-export type Discard = Writable<Card[]>
 
 export function createNewDeck(ranks: Rank[], suits: Suit[]): Card[] {
     const cards: Card[] = []
@@ -12,6 +11,16 @@ export function createNewDeck(ranks: Rank[], suits: Suit[]): Card[] {
             cards.push(new Card(rank, suit))
         })
     })
+
+    return cards
+}
+
+export function createFinalDeck(deckCount: number = 1, ranks: Rank[] = RANKS, suits: Suit[] = SUITS): Card[] {
+    const cards: Card[] = []
+    for (let i = 0; i < deckCount; i++) {
+        const deck = createNewDeck(ranks, suits)
+        cards.push(...deck)
+    }
 
     return cards
 }

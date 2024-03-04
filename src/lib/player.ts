@@ -56,7 +56,7 @@ export class Player {
         })
     }
 
-    getHandValue(): number {
+    generateHandValue(): number {
         this.hand.value.update(() => {
             return calculateHandValue(this.hand)
         })
@@ -84,7 +84,7 @@ export class Player {
 
     hit(deck: Deck) {
         this.drawCard(deck)
-        const value = this.getHandValue()
+        const value = this.generateHandValue()
 
         if (value > BLACKJACK) {
             this.state.set("bust")
@@ -95,18 +95,28 @@ export class Player {
     }
 
     stand() {
-        console.log(`${this.name} stands with a hand value of ${this.getHandValue()}.`)
+        console.log(`${this.name} stands with a hand value of ${this.generateHandValue()}.`)
         this.state.set("stand")
     }
 
     payOut(dealerValue: number) {
         const playerValue = get(this.hand.value)
+
         if (playerValue <= BLACKJACK) {
-            if (dealerValue > BLACKJACK || playerValue > dealerValue) {
+            if (dealerValue >= BLACKJACK || playerValue >= dealerValue) {
                 this.bet.update(bet => {
                     this.chips.update(chips => {
-                        const winnings = bet.amount * bet.multiplier * 2
-                        console.log(`${this.name} bet ${bet.amount} and wins ${winnings}.`)
+                        let winningMultiplier = 2
+
+                        if (playerValue === dealerValue) {
+                            winningMultiplier = 1
+                            console.log(`${this.name} bet ${bet.amount} and pushes.`)
+                        }
+
+                        const winnings = bet.amount * bet.multiplier * winningMultiplier
+                        if (winningMultiplier !== 1) {
+                            console.log(`${this.name} bet ${bet.amount} and wins ${winnings}.`)
+                        }
 
                         return chips + winnings
                     })
@@ -115,6 +125,16 @@ export class Player {
                 })
             }
         }
+    }
+
+    emptyHand(discard: Deck) {
+        this.hand.cards.update(cards => {
+            discard.update(discard => {
+                discard.push(...cards)
+                return discard
+            })
+            return []
+        })
     }
 }
 
