@@ -1,3 +1,4 @@
+import { Card } from "$lib/card";
 import { createFinalDeck } from "$lib/deck";
 import { Game } from "$lib/game";
 import { get, writable } from "svelte/store";
@@ -48,6 +49,18 @@ describe("empty hands", () => {
     })
 })
 
+describe("reset player states", () => {
+    it("loops through players and resets their states to inactive", () => {
+        const game = new Game(1)
+        game.startBetRound()
+        game.resetPlayerStates()
+
+        const expectedPlayerState = "inactive"
+        const receivedPlayerState = get(game.players[0].state)
+        expect(receivedPlayerState).toBe(expectedPlayerState)
+    })
+})
+
 describe("deck check", () => {
     it("determines if the deck needs to be shuffled", () => {
         const [playerAmount, deckAmount, startingChips] = [1, 3, 100]
@@ -79,5 +92,37 @@ describe("reshuffle deck", () => {
         game.reshuffleDeck()
 
         expect(get(game.deck).length).toBe(104)
+    })
+})
+
+describe("end round with naturals", () => {
+    it("should pay out natural winners with 1.5 times and ties resulting in bets being reclaimed", () => {
+        const game = new Game(2, 3, 100)
+        const players = game.players
+
+        players[0].hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "10", long: "ten" }, value: 10 }, { name: "hearts", symbol: "♥" })
+        ])
+        players[1].hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "8", long: "eight" }, value: 8 }, { name: "hearts", symbol: "♥" })
+        ])
+        players[2].hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "9", long: "nine" }, value: 9 }, { name: "hearts", symbol: "♥" })
+        ])
+
+
+        players[0].placeBet(50)
+        players[1].placeBet(20)
+
+        game.checkNaturals()
+        game.endRound()
+
+        const expectedChips = [100 + 50 * 1.5, 80]
+        const receivedChips = [get(players[0].chips), get(players[1].chips)]
+
+        expect(expectedChips).toStrictEqual(receivedChips)
     })
 })

@@ -48,7 +48,39 @@ export class Game {
         dealCards(2, this.players, this.deck)
         this.players[0].state.set("playing")
         console.log("Cards dealt.")
-        console.log(`${this.players[0].name}'s turn.`)
+
+        // Check for naturals and end round if found
+        if (this.checkNaturals()) {
+            this.endRound()
+            return
+        } else {
+            console.log(`${this.players[0].name}'s turn.`)
+        }
+    }
+
+    /** Returns boolean if naturals are found and sets the players' hands
+     * that have naturals as having a natural.
+     */
+    checkNaturals(): boolean {
+        // Loop through every player's hand and check for ace and 10 value card
+        // Determine players with naturals and if the dealer has a natural
+        // Set hands with naturals to "natural" state
+        const players = this.players
+        let hasNatural = false
+
+        for (let i = 0; i < players.length; i++) {
+            const hand = players[i].hand
+            const cards = get(hand.cards)
+            const value = players[i].generateHandValue()
+
+            if (cards.length === 2 && value === 21) {
+                players[i].state.set("natural")
+                hasNatural = true
+                console.log(`${players[i].name} has a natural.`)
+            }
+        }
+
+        return hasNatural
     }
 
     endRound() {
@@ -57,17 +89,7 @@ export class Game {
 
         this.checkWinners()
         this.emptyHands()
-
-        // Check deck size to see if a reshuffle is needed.
-        const totalDeckSize = DECKS * 52
-        const currentDeckSize = get(this.deck).length
-        if (currentDeckSize <= totalDeckSize * PENETRATION) {
-            console.log("Deck penetration reached. Reshuffling deck.")
-
-            this.deck = writable(createFinalDeck(DECKS, RANKS, SUITS))
-            shuffle(get(this.deck), INITIAL_SHUFFLE_COUNT)
-        }
-
+        this.resetPlayerStates()
         if (this.checkDeck()) this.reshuffleDeck()
 
         // Begin new round of bets
@@ -89,6 +111,13 @@ export class Game {
         const players = this.players
         for (let i = 0; i < players.length; i++) {
             players[i].emptyHand(this.discard)
+        }
+    }
+
+    resetPlayerStates() {
+        const players = this.players
+        for (let i = 0; i < players.length; i++) {
+            players[i].state.set("inactive")
         }
     }
 

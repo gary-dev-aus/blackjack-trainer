@@ -15,6 +15,7 @@ export const SHUFFLE_WEIGHT = {
     "6": 0.05,
     "7": 0.05
 }
+export const NATURAL_MULTIPLIER = 1.5
 
 export type Rank = {
     name: {

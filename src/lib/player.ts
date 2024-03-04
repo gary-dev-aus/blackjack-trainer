@@ -5,7 +5,7 @@ import { BET_MAXIMUM, BET_MINIMUM, BLACKJACK, STARTING_CHIPS } from "./gameConfi
 
 type Hand = { cards: Writable<Card[]>, value: Writable<number> }
 
-type PlayerState = "inactive" | "betting" | "playing" | "stand" | "bust" | "blackjack"
+type PlayerState = "inactive" | "betting" | "playing" | "stand" | "bust" | "blackjack" | "natural"
 
 type Bet = Writable<{
     amount: number;
@@ -33,6 +33,7 @@ export class Player {
         this.chips = writable(chips)
     }
 
+    /** Pops last card off deck array and pushes is it the player hand. */
     drawCard(deck: Deck, reveal: boolean = true) {
         deck.update(deck => {
             if (deck.length === 0) {
@@ -84,6 +85,7 @@ export class Player {
         this.state.set("inactive")
     }
 
+
     hit(deck: Deck) {
         this.drawCard(deck)
         const value = this.generateHandValue()
@@ -114,11 +116,16 @@ export class Player {
                         if (playerValue === dealerValue) {
                             winningMultiplier = 1
                             console.log(`${this.name} bet ${bet.amount} and pushes.`)
+                        } else if (get(this.state) === "natural") {
+                            winningMultiplier = 2.5
                         }
 
                         const winnings = bet.amount * bet.multiplier * winningMultiplier
-                        if (winningMultiplier !== 1) {
+
+                        if (winningMultiplier === 2) {
                             console.log(`${this.name} bet ${bet.amount} and wins ${winnings}.`)
+                        } else if (winningMultiplier === 2.5) {
+                            console.log(`${this.name} bet ${bet.amount} and wins ${winnings} with a natural.`)
                         }
 
                         return chips + winnings
