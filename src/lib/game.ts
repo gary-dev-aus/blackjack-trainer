@@ -19,6 +19,7 @@ export class Game {
         }
         // Dealer goes last
         this.players.push(new Player("Dealer"))
+        this.players[this.players.length - 1].isDealer = true
 
         const cards: Card[] = []
 
@@ -85,7 +86,6 @@ export class Game {
                 }
             } else if (state === "player") {
                 console.log(string)
-                console.log(get(this.players[newPlayerIndex].state))
                 this.players[newPlayerIndex].state.set("playing")
             }
         }

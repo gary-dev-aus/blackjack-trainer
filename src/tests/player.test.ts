@@ -1,10 +1,19 @@
 import { Card } from "$lib/card";
 import { createNewDeck, type Deck } from "$lib/deck";
+import { Game } from "$lib/game";
 import type { Rank, Suit } from "$lib/gameConfig";
 import { Player } from "$lib/player";
 import { get, writable } from "svelte/store";
 import { describe, expect, it } from "vitest";
 
+describe("last player is dealer", () => {
+    it("last player should have isDealer = true", () => {
+        const game = new Game(3)
+        const lastPlayer = game.players[3]
+
+        expect(lastPlayer.isDealer).toBe(true)
+    })
+})
 
 describe("player draws card", () => {
     it("should draw a card from the deck and add it to the player's hand", () => {
