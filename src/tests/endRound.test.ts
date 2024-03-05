@@ -97,32 +97,54 @@ describe("reshuffle deck", () => {
 
 describe("end round with naturals", () => {
     it("should pay out natural winners with 1.5 times and ties resulting in bets being reclaimed", () => {
-        const game = new Game(2, 3, 100)
-        const players = game.players
+        const game1 = new Game(2, 3, 100)
+        const players1 = game1.players
 
-        players[0].hand.cards.set([
+        players1[0].hand.cards.set([
             new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
             new Card({ name: { short: "10", long: "ten" }, value: 10 }, { name: "hearts", symbol: "♥" })
         ])
-        players[1].hand.cards.set([
+        players1[1].hand.cards.set([
             new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
             new Card({ name: { short: "8", long: "eight" }, value: 8 }, { name: "hearts", symbol: "♥" })
         ])
-        players[2].hand.cards.set([
+        players1[2].hand.cards.set([
             new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
             new Card({ name: { short: "9", long: "nine" }, value: 9 }, { name: "hearts", symbol: "♥" })
         ])
 
 
-        players[0].placeBet(50)
-        players[1].placeBet(20)
+        players1[0].placeBet(50)
+        players1[1].placeBet(20)
 
-        game.checkNaturals()
-        game.endRound()
+        game1.checkNaturals()
+        game1.endRound()
 
         const expectedChips = [100 + 50 * 1.5, 80]
-        const receivedChips = [get(players[0].chips), get(players[1].chips)]
+        const receivedChips = [get(players1[0].chips), get(players1[1].chips)]
 
         expect(expectedChips).toStrictEqual(receivedChips)
+
+        const game2 = new Game(1, 3, 100)
+        const players2 = game2.players
+
+        players2[0].hand.cards.set([
+            new Card({ name: { short: "5", long: "five" }, value: 5 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "10", long: "ten" }, value: 10 }, { name: "hearts", symbol: "♥" })
+        ])
+        players2[1].hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "10", long: "ten" }, value: 10 }, { name: "hearts", symbol: "♥" })
+        ])
+
+        players2[0].placeBet(50)
+
+        game2.checkNaturals()
+        game2.endRound()
+
+        const expectedChips2 = 50
+        const receivedChips2 = get(players2[0].chips)
+
+        expect(expectedChips2).toBe(receivedChips2)
     })
 })

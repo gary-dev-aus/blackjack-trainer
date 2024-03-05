@@ -118,7 +118,12 @@ export class Player {
         // draws another A:     A, 4, A = 16, hit
         // draws another A:     A, 4, A, A = 17, stand
 
-        // TODO - flip face down card face up before the rest of the dealer's turn.
+        this.hand.cards.update(cards => {
+            cards[1].isRevealed = true
+            return cards
+        })
+        this.isRevealed.set(true)
+
         while (this.generateHandValue() < DEALER_STANDS_AT) {
             this.hit(game.deck)
         }
@@ -139,11 +144,14 @@ export class Player {
                         // player wins bet
                         let winningMultiplier = 2
 
+                        // Check if dealer has natural and player does not
                         if (playerValue === dealerValue) {
                             winningMultiplier = 1
                             console.log(`${this.name} bet ${bet.amount} and pushes.`)
                         } else if (get(this.state) === "natural") {
                             winningMultiplier = 2.5
+                        } else if (dealerValue === BLACKJACK) {
+                            winningMultiplier = 0
                         }
 
                         const winnings = bet.amount * bet.multiplier * winningMultiplier
@@ -152,6 +160,8 @@ export class Player {
                             console.log(`${this.name} bet ${bet.amount} and wins ${winnings}.`)
                         } else if (winningMultiplier === 2.5) {
                             console.log(`${this.name} bet ${bet.amount} and wins ${winnings} with a natural.`)
+                        } else if (winningMultiplier === 0) {
+                            console.log(`The dealer has drawn a natural while ${this.name} has not - bets are collected.`)
                         }
 
                         return chips + winnings
