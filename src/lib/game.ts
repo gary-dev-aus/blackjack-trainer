@@ -23,6 +23,7 @@ export class Game {
         // Dealer goes last
         this.players.push(new Player("Dealer"))
         this.players[this.players.length - 1].isDealer = true
+        this.players[this.players.length - 1].isRevealed.set(false)
 
         this.deck = writable(createFinalDeck(deckCount, RANKS, SUITS))
     }
@@ -134,6 +135,9 @@ export class Game {
         const players = this.players
         for (let i = 0; i < players.length; i++) {
             players[i].state.set("inactive")
+            if (players[i].isDealer) {
+                players[i].isRevealed.set(false)
+            }
         }
     }
 

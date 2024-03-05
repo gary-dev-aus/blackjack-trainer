@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 
 describe("dealer ai", () => {
     it("hits on 16 or less", () => {
-        // TODO
         const game = new Game(1, 1, 100)
         const dealer = game.players[1]
         game.deck.set([

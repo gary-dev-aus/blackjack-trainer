@@ -8,14 +8,22 @@
 	const value = player.hand.value;
 	const chips = player.chips;
 	const bet = player.bet;
+	const isRevealed = player.isRevealed;
 
 	const detailsClass = 'flex flex-row space-x-2';
 </script>
 
 <p>{player.name}</p>
 <div class={detailsClass}>
-	{#if $hand.length > 0}
+	{#if $hand.length > 0 && $isRevealed}
 		<p>Value: {$value}</p>
+		<button
+			on:click={() => {
+				console.log($isRevealed);
+			}}
+		>
+			debug
+		</button>
 	{/if}
 	{#if $playerState === 'bust'}
 		<p>Bust!</p>
