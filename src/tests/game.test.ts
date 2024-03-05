@@ -35,10 +35,16 @@ describe("check naturals", () => {
             new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
             new Card({ name: { short: "9", long: "nine" }, value: 9 }, { name: "hearts", symbol: "♥" })
         ])
+        players[2].hand.cards.set([
+            new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
+            new Card({ name: { short: "j", long: "jack" }, value: 10 }, { name: "hearts", symbol: "♥" })
+        ])
 
         const hasNaturals = game.checkNaturals()
 
         expect(hasNaturals).toBe(true)
         expect(get(players[0].state)).toBe("natural")
+
+        expect(get(players[2].isRevealed)).toBe(true)
     })
 })
