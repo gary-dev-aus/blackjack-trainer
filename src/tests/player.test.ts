@@ -73,6 +73,7 @@ describe("player busts", () => {
             new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
         ])
         const deck = writable([
+            new Card({ name: { short: "10", long: "ten" }, value: 10 }, { name: "hearts", symbol: "♥" }),
             new Card({ name: { short: "k", long: "king" }, value: 10 }, { name: "hearts", symbol: "♥" }),
             new Card({ name: { short: "a", long: "ace" }, value: 11 }, { name: "hearts", symbol: "♥" }),
         ])
@@ -84,8 +85,14 @@ describe("player busts", () => {
 
         player.hit(deck)
 
-        const expectedState2 = "bust"
+        const expectedState2 = "inactive"
         const receivedState2 = get(player.state)
         expect(receivedState2).toBe(expectedState2)
+
+        player.hit(deck)
+
+        const expectedState3 = "bust"
+        const receivedState3 = get(player.state)
+        expect(receivedState3).toBe(expectedState3)
     })
 })

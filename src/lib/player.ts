@@ -1,7 +1,8 @@
 import { get, writable, type Writable } from "svelte/store"
 import type { Card } from "./card"
 import type { Deck } from "./deck"
-import { BET_MAXIMUM, BET_MINIMUM, BLACKJACK, STARTING_CHIPS } from "./gameConfig"
+import { BET_MAXIMUM, BET_MINIMUM, BLACKJACK, DEALER_STANDS_AT, STARTING_CHIPS } from "./gameConfig"
+import type { Game } from "./game"
 
 type Hand = { cards: Writable<Card[]>, value: Writable<number> }
 
@@ -27,6 +28,7 @@ export class Player {
         history: []
     })
     isDealer: boolean = false
+    isRevealed: Writable<boolean> = writable(true)
 
     constructor(name: string, chips: number = STARTING_CHIPS) {
         this.name = name
@@ -103,21 +105,53 @@ export class Player {
         this.state.set("stand")
     }
 
-    payOut(dealerValue: number) {
+    dealerTurn(game: Game) {
+        console.log("Dealer ai running..")
+        this.dealerAi(game)
+
+        game.endRound()
+    }
+
+    dealerAi(game: Game) {
+        // The dealer must hit on 16 or less including aces
+        // i.e. initial hand:   A, 4 = 15, hit
+        // draws another A:     A, 4, A = 16, hit
+        // draws another A:     A, 4, A, A = 17, stand
+
+        this.hand.cards.update(cards => {
+            cards[1].isRevealed = true
+            return cards
+        })
+        this.isRevealed.set(true)
+
+        while (this.generateHandValue() < DEALER_STANDS_AT) {
+            this.hit(game.deck)
+        }
+
+        if (this.generateHandValue() < BLACKJACK) {
+            this.stand()
+        }
+    }
+
+    settleBet(dealerValue: number) {
         const playerValue = get(this.hand.value)
 
         if (playerValue <= BLACKJACK) {
             if (dealerValue >= BLACKJACK || playerValue >= dealerValue) {
                 this.bet.update(bet => {
                     this.chips.update(chips => {
-                        // TODO - score multipliers for naturals
+                        // FIXME - when dealer has a natural and player loses their bet
+                        // player wins bet
                         let winningMultiplier = 2
 
+                        // Check if dealer has natural and player does not
                         if (playerValue === dealerValue) {
                             winningMultiplier = 1
                             console.log(`${this.name} bet ${bet.amount} and pushes.`)
                         } else if (get(this.state) === "natural") {
                             winningMultiplier = 2.5
+                        } else if (dealerValue === BLACKJACK) {
+                            winningMultiplier = 0
                         }
 
                         const winnings = bet.amount * bet.multiplier * winningMultiplier
@@ -126,6 +160,8 @@ export class Player {
                             console.log(`${this.name} bet ${bet.amount} and wins ${winnings}.`)
                         } else if (winningMultiplier === 2.5) {
                             console.log(`${this.name} bet ${bet.amount} and wins ${winnings} with a natural.`)
+                        } else if (winningMultiplier === 0) {
+                            console.log(`The dealer has drawn a natural while ${this.name} has not - bets are collected.`)
                         }
 
                         return chips + winnings
@@ -134,6 +170,8 @@ export class Player {
                     return { amount: 0, multiplier: 1, history: bet.history }
                 })
             }
+        } else {
+            console.log(`${this.name} bet ${get(this.bet).amount} and busts.`)
         }
     }
 
@@ -161,7 +199,14 @@ function calculateHandValue(hand: Hand): number {
         value += card.rank.value
     })
 
-    if (value > BLACKJACK && aces > 0) value -= 10
+    if (value > BLACKJACK && aces > 0) {
+        for (let i = 0; i < aces; i++) {
+            value -= 10
+            if (value <= BLACKJACK) {
+                break
+            }
+        }
+    }
 
     return value
 }
