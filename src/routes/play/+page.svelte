@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Player from '$lib/components/player/Player.svelte';
 	import { Game } from '$lib/game';
-	import { DECKS } from '$lib/gameConfig';
+	import { DECKS, PLAYER_COUNT, STARTING_CHIPS } from '$lib/gameConfig';
 
-	const game = new Game(3, DECKS);
+	const game = new Game(PLAYER_COUNT, DECKS, STARTING_CHIPS);
 	const gameState = game.state;
 	const players = game.players;
 	const deck = game.deck;

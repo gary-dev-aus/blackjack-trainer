@@ -65,6 +65,8 @@ export class Game {
         // Loop through every player's hand and check for ace and 10 value card
         // Determine players with naturals and if the dealer has a natural
         // Set hands with naturals to "natural" state
+        // If dealer's face up card is an ace or 10 value, face down card is flipped face up
+        // If dealer has a natural but no players do, bets are all collected.
         const players = this.players
         let hasNatural = false
 
@@ -72,6 +74,20 @@ export class Game {
             const hand = players[i].hand
             const cards = get(hand.cards)
             const value = players[i].generateHandValue()
+
+            if (players[i].isDealer) {
+                const potentialNaturals = [11, 10]
+                const faceUpCardValue = cards[1].rank.value
+                const isPotentialNatural = potentialNaturals.includes(faceUpCardValue)
+                if (isPotentialNatural) {
+                    cards[0].isRevealed = true
+                    players[i].isRevealed.set(true)
+                    const revealedCard = cards[0]
+                    // console.log(`Dealer has a potential natural so their face down card is revealed and it is a ${cards[0].toFullName}.`)
+                    console.log("Dealer has a potential natural.")
+                    console.log(`Dealer's face down card is a ${revealedCard.toFullName()}.`)
+                }
+            }
 
             if (cards.length === 2 && value === 21) {
                 players[i].state.set("natural")
@@ -87,7 +103,7 @@ export class Game {
         console.log("Round has ended. Winnings will now be awarded.")
         this.state.set("roundEnd")
 
-        this.checkWinners()
+        this.settlement()
         this.emptyHands()
         this.resetPlayerStates()
         if (this.checkDeck()) this.reshuffleDeck()
@@ -96,14 +112,14 @@ export class Game {
         this.startBetRound()
     }
 
-    checkWinners() {
+    settlement() {
         const players = this.players
         const dealer = players[players.length - 1]
         const dealerValue = get(dealer.hand.value)
 
         // Pay out winnings
         for (let i = 0; i < players.length - 1; i++) {
-            players[i].payOut(dealerValue)
+            players[i].settleBet(dealerValue)
         }
     }
 
@@ -147,7 +163,7 @@ export class Game {
     }
 
     newPlayerTurn(currentPlayer: Player) {
-        const state = get(this.state)
+        let state = get(this.state)
 
         const currentPlayerIndex = this.players.indexOf(currentPlayer)
         const newPlayerIndex = currentPlayerIndex + 1
@@ -157,13 +173,10 @@ export class Game {
         } else {
             const string = `${this.players[newPlayerIndex].name}'s turn.`
 
-            let isDealer = false
-            // Check for dealer
-            if (newPlayerIndex === this.players.length - 1) {
-                if (state === "player") {
-                    this.state.set("dealer")
-                }
-                isDealer = true
+            const isDealer = this.players[newPlayerIndex].isDealer
+            if (isDealer && state === "player") {
+                this.state.set("dealer")
+                state = get(this.state)
             }
 
             if (state === "betting") {
@@ -176,6 +189,8 @@ export class Game {
             } else if (state === "player") {
                 console.log(string)
                 this.players[newPlayerIndex].state.set("playing")
+            } else if (state === "dealer") {
+                this.players[newPlayerIndex].dealerTurn(this)
             }
         }
     }

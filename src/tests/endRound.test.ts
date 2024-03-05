@@ -20,7 +20,7 @@ describe("check winners", () => {
         players[0].placeBet(player1bet)
         players[1].placeBet(player2bet)
 
-        game.checkWinners()
+        game.settlement()
 
         // Player 1 winds and 2 pushes (ties)
         const expectedChips = [150, 100]
